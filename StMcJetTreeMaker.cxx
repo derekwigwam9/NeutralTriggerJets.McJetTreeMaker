@@ -93,7 +93,7 @@ void StMcJetTreeMaker::Init() {
     if (!fInput || !(fInput -> IsOpen())) {
       fInput = new TFile(_sInput.Data());
     }
-    fInput -> GetObject("GfmtoDst_gnt", _tMc);
+    fInput -> GetObject("McTracks", _tMc);
   }
   InitializeInputTree(_tMc);
   InitializeOutputTree(_tJet);
@@ -137,11 +137,11 @@ void StMcJetTreeMaker::Make() {
 
 
     // event info
-    const UInt_t   runID = _runNumber;
-    const Long64_t nTrks = _nPrimaryTracks;
-    const Double_t xVtx  = _xVertex;
-    const Double_t yVtx  = _yVertex;
-    const Double_t zVtx  = _zVertex;
+    const UInt_t   runID = _mcRunId;
+    const Long64_t nTrks = _mcNumTrks;
+    const Double_t xVtx  = _mcVx;
+    const Double_t yVtx  = _mcVy;
+    const Double_t zVtx  = _mcVz;
     const Double_t rVtx  = sqrt((xVtx * xVtx) + (yVtx * yVtx));
 
     // event cuts
@@ -151,21 +151,22 @@ void StMcJetTreeMaker::Make() {
 
 
     // trigger loop
-    UInt_t   idTrg     = 0;
-    Bool_t   isGoodTrg = false;
-    Double_t hTrg      = 0.;
-    Double_t fTrg      = 0.;
-    Double_t eTrg      = 0.;
-    Double_t eTtrg     = 0.;
+    UInt_t   idTrg    = 0;
+    Bool_t   foundTrg = false;
+    Double_t hTrg     = 0.;
+    Double_t fTrg     = 0.;
+    Double_t eTrg     = 0.;
+    Double_t eTtrg    = 0.;
     for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++) {
 
       // track info
-      const Double_t idTrk = _PrimaryTrackArray_geantId[iTrk];
-      const Double_t hTrk  = _PrimaryTrackArray_eta[iTrk];
-      const Double_t pXtrk = _PrimaryTrackArray_pX[iTrk];
-      const Double_t pYtrk = _PrimaryTrackArray_pY[iTrk];
-      const Double_t pZtrk = _PrimaryTrackArray_pZ[iTrk];
-      const Double_t pTtrk = _PrimaryTrackArray_pT[iTrk];
+      const Int_t    idEnd = _mcIdVxEnd -> at(iTrk);
+      const Double_t idTrk = _mcIdGeant -> at(iTrk);
+      const Double_t hTrk  = _mcEta     -> at(iTrk);
+      const Double_t pXtrk = _mcPx      -> at(iTrk);
+      const Double_t pYtrk = _mcPy      -> at(iTrk);
+      const Double_t pZtrk = _mcPz      -> at(iTrk);
+      const Double_t pTtrk = _mcPt      -> at(iTrk);
       const Double_t eTrk  = sqrt((pTtrk * pTtrk) + (pZtrk * pZtrk) + (MassPi0 * MassPi0));
       const Double_t eTtrk = eTrk * TMath::Sin(2. * TMath::ATan(TMath::Exp(-1. * hTrk)));
 
@@ -175,13 +176,15 @@ void StMcJetTreeMaker::Make() {
       if ((pXtrk < 0.) && (pYtrk < 0.)) fTrk += TMath::Pi();
 
       // trigger cuts
-      isGoodTrg = IsGoodTrigger(hTrk, eTtrk, idTrk);
-      if (isGoodTrg) {
-        idTrg = idTrk;
-        hTrg  = hTrk;
-        fTrg  = fTrk;
-        eTrg  = eTrk;
-        eTtrg = eTtrk;
+      const Bool_t isGoodTrg    = IsGoodTrigger(hTrk, eTtrk, idTrk);
+      const Bool_t isFinalState = IsFinalState(idEnd);
+      if (isGoodTrg && isFinalState) {
+        idTrg    = idTrk;
+        hTrg     = hTrk;
+        fTrg     = fTrk;
+        eTrg     = eTrk;
+        eTtrg    = eTtrk;
+        foundTrg = true;
         break;
       }
 
@@ -191,7 +194,7 @@ void StMcJetTreeMaker::Make() {
     const Bool_t isPi0 = IsPi0(idTrg);
     const Bool_t isGam = IsGamma(idTrg);
     const Bool_t isHad = IsHadron(idTrg);
-    if (!isGoodTrg) continue;
+    if (!foundTrg) continue;
 
 
     // count triggers
@@ -219,12 +222,13 @@ void StMcJetTreeMaker::Make() {
     for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++) {
 
       // track info
-      const Double_t qTrk  = _PrimaryTrackArray_charge[iTrk];
-      const Double_t hTrk  = _PrimaryTrackArray_eta[iTrk];
-      const Double_t pXtrk = _PrimaryTrackArray_pX[iTrk];
-      const Double_t pYtrk = _PrimaryTrackArray_pY[iTrk];
-      const Double_t pZtrk = _PrimaryTrackArray_pZ[iTrk];
-      const Double_t pTtrk = _PrimaryTrackArray_pT[iTrk];
+      const Int_t    idEnd = _mcIdVxEnd -> at(iTrk);
+      const Double_t qTrk  = _mcCharge  -> at(iTrk);
+      const Double_t hTrk  = _mcEta     -> at(iTrk);
+      const Double_t pXtrk = _mcPx      -> at(iTrk);
+      const Double_t pYtrk = _mcPy      -> at(iTrk);
+      const Double_t pZtrk = _mcPz      -> at(iTrk);
+      const Double_t pTtrk = _mcPt      -> at(iTrk);
       const Double_t eTrk  = sqrt((pTtrk * pTtrk) + (pZtrk * pZtrk) + (MassPi0 * MassPi0));
 
       // calculate phi
@@ -239,9 +243,10 @@ void StMcJetTreeMaker::Make() {
         dFtrk -= TMath::TwoPi();
 
       // track cuts
-      const Bool_t isCharged = (qTrk != 0.);
-      const Bool_t isGoodTrk = IsGoodTrack(hTrk, pTtrk);
-      if (!isGoodTrk) continue;
+      const Bool_t isCharged    = (qTrk != 0.);
+      const Bool_t isGoodTrk    = IsGoodTrack(hTrk, pTtrk);
+      const Bool_t isFinalState = IsFinalState(idEnd);
+      if (!isGoodTrk || !isFinalState) continue;
 
 
       if (isCharged) {
@@ -340,17 +345,17 @@ void StMcJetTreeMaker::Make() {
     _JetConsE.clear();
 
     // jet event info
-    _EventIndex = _eventNumber;
+    _EventIndex = _mcEventId;
     _NJets      = (Int_t) jets.size();
-    _RunId      = _runNumber;
-    _Refmult    = _refMult;
+    _RunId      = _mcRunId;
+    _Refmult    = _mcNumTrks;
     _TSP        = (Double_t) idTrg;
     _TrgEta     = hTrg;
     _TrgPhi     = fTrg;
     _TrgEt      = eTtrg;
     _Rho        = rhoJet;
     _Sigma      = sigJet;
-    _Vz         = _zVertex;
+    _Vz         = _mcVz;
 
     // jet loop
     const UInt_t nJets = (UInt_t) jets.size();
