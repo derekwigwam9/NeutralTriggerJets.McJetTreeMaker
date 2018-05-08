@@ -104,9 +104,29 @@ void StMcJetTreeMaker::Init() {
 
 
 
-void StMcJetTreeMaker::Make() {
+void StMcJetTreeMaker::Make(const UInt_t evtFlag, const UInt_t trgFlag) {
 
   if (_tMc == 0) return;
+
+  // set event and trigger mode
+  Bool_t applyEventCuts(false);
+  Bool_t requireTrigger(false);
+  switch (evtFlag) {
+    case 0:
+      applyEventCuts = false;
+      break;
+    default:
+      applyEventCuts = true;
+      break;
+  }
+  switch (trgFlag) {
+    case 0:
+      requireTrigger = false;
+      break;
+    default:
+      requireTrigger = true;
+      break;
+  }
 
 
   const Long64_t nEvts = _tMc -> GetEntriesFast();
@@ -145,9 +165,10 @@ void StMcJetTreeMaker::Make() {
     const Double_t rVtx  = sqrt((xVtx * xVtx) + (yVtx * yVtx));
 
     // event cuts
-    const Bool_t isGoodRun = IsGoodRunID(runID);
-    const Bool_t isGoodEvt = IsGoodEvent(rVtx, zVtx);
-    if (!isGoodRun || !isGoodEvt) continue;
+    const Bool_t isGoodRun  = IsGoodRunID(runID);
+    const Bool_t isGoodEvt  = IsGoodEvent(rVtx, zVtx);
+    const Bool_t isInEvtCut = (isGoodRun && isGoodEvt);
+    if (applyEventCuts && !isInEvtCut) continue;
 
 
     // trigger loop
@@ -194,7 +215,7 @@ void StMcJetTreeMaker::Make() {
     const Bool_t isPi0 = IsPi0(idTrg);
     const Bool_t isGam = IsGamma(idTrg);
     const Bool_t isHad = IsHadron(idTrg);
-    if (!foundTrg) continue;
+    if (requireTrigger && !foundTrg) continue;
 
 
     // count triggers
@@ -446,7 +467,7 @@ void StMcJetTreeMaker::Make() {
   PrintInfo(14);
 
 
-}  // end 'Make()'
+}  // end 'Make(UInt_t)'
 
 
 

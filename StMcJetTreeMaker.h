@@ -194,7 +194,7 @@ class StMcJetTreeMaker {
     void SetTrackParameters(const Double_t etaTrkMax, const Double_t pTtrkMin, const Double_t pTtrkMax);
     void SetJetParameters(const UInt_t type, const UInt_t nRepeat, const UInt_t nRemove, const Double_t rJet, const Double_t aGhost, const Double_t pTjetMin, const Double_t etaGhostMax, const Double_t etaJetMax, const Double_t etaBkgdMax);
     void Init();
-    void Make();
+    void Make(const UInt_t evtFlag=0, const UInt_t trgFlag=0);
     void Finish();
 
   ClassDef(StMcJetTreeMaker, 1)

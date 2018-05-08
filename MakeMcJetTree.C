@@ -7,6 +7,12 @@
 //
 // NOTE: type = 0, makes charged jets
 //       type = 1, makes full jets.
+//
+// NOTE: event = 0, do *not* apply event cuts
+//       event = 1, apply event cuts
+//
+// NOTE: trigger = 0, do *not* require trigger
+//       trigger = 1, require trigger.
 
 
 #include "TString.h"
@@ -20,14 +26,15 @@ class StMcJetTreeMaker;
 
 // i/o parameters
 static const TString  sInput("../../MuDstMatching/output/merged/pt35rff.matchWithMc.root");
-//static const TString  sOuput("pp200r12pt35g.r04rm1full.d6m1y2018.root");
-static const TString  sOuput("test.root");
-static const Double_t pTparton(35);
+static const TString  sOuput("pp200r12pt35g.r03rm1full.d6m1y2018.root");
+static const Double_t pTparton(35.);
 // jet parameters
 static const UInt_t   type(0);
+static const UInt_t   event(0);
+static const UInt_t   trigger(0);
 static const UInt_t   nRepeat(1);
 static const UInt_t   nRemove(1);
-static const Double_t rJet(0.4);
+static const Double_t rJet(0.3);
 static const Double_t aGhost(0.01);
 static const Double_t pTjetMin(0.2);
 static const Double_t etaGhostMax(1.0 + rJet);
@@ -62,7 +69,7 @@ void MakeMcJetTree(const Bool_t isInBatchMode=false) {
   mcJetMaker -> SetJetParameters(type, nRepeat, nRemove, rJet, aGhost, pTjetMin, etaGhostMax, etaJetMax, etaBkgdMax);
   // find jets
   mcJetMaker -> Init();
-  mcJetMaker -> Make();
+  mcJetMaker -> Make(event, trigger);
   mcJetMaker -> Finish();
 
 }
