@@ -25,7 +25,7 @@ class StMcJetTreeMaker;
 
 
 // i/o parameters
-static const TString  sInDefault("../../MuDstMatching/output/merged/pt35ff.matchWithMc.root");
+static const TString  sInDefault("../../MuDstMatching/output/merged/pt25ff.matchWithMc.root");
 static const TString  sOutDefault("pp200r9pt25ff.particle.r05rm1chrg.root");
 static const Double_t pTdefault(25.);
 // jet parameters
@@ -62,7 +62,7 @@ void MakeMcJetTree(const Double_t pTparton=pTdefault, const TString sInput=sInDe
 
   StMcJetTreeMaker *mcJetMaker = new StMcJetTreeMaker(isInBatchMode);
   // set parameters
-  mcJetMaker -> SetInputAndOutputFiles(sInput.Data(), sOuput.Data(), pTparton);
+  mcJetMaker -> SetInputAndOutputFiles(sInput.Data(), sOutput.Data(), pTparton);
   mcJetMaker -> SetEventParameters(rVtxMax, zVtxMax);
   mcJetMaker -> SetTriggerParameters(etaTrgMax, eTtrgMin, eTtrgMax);
   mcJetMaker -> SetTrackParameters(etaTrkMax, pTtrkMin, pTtrkMax);
