@@ -25,16 +25,16 @@ class StMcJetTreeMaker;
 
 
 // i/o parameters
-static const TString  sInput("../../MuDstMatching/output/merged/pt35rff.matchWithMc.root");
-static const TString  sOuput("pp200r12pt35g.r03rm1full.d6m1y2018.root");
-static const Double_t pTparton(35.);
+static const TString  sInDefault("../../MuDstMatching/output/merged/pt35ff.matchWithMc.root");
+static const TString  sOutDefault("pp200r9pt25ff.particle.r05rm1chrg.root");
+static const Double_t pTdefault(25.);
 // jet parameters
 static const UInt_t   type(0);
 static const UInt_t   event(0);
 static const UInt_t   trigger(0);
 static const UInt_t   nRepeat(1);
 static const UInt_t   nRemove(1);
-static const Double_t rJet(0.3);
+static const Double_t rJet(0.5);
 static const Double_t aGhost(0.01);
 static const Double_t pTjetMin(0.2);
 static const Double_t etaGhostMax(1.0 + rJet);
@@ -42,7 +42,7 @@ static const Double_t etaJetMax(1.0 - rJet);
 static const Double_t etaBkgdMax(1.0);
 
 
-void MakeMcJetTree(const Bool_t isInBatchMode=false) {
+void MakeMcJetTree(const Double_t pTparton=pTdefault, const TString sInput=sInDefault, const TString sOutput=sOutDefault, const Bool_t isInBatchMode=false) {
 
   gSystem -> Load("/opt/star/Xsl64_gcc482/lib/libfastjet.so");
   gSystem -> Load("/opt/star/Xsl64_gcc482/lib/libfastjettools.so");
