@@ -85,6 +85,16 @@ void StMcJetTreeMaker::SetJetParameters(const UInt_t type, const UInt_t nRepeat,
 
 
 
+void StMcJetTreeMaker::AdjustTrackEfficiency(const Bool_t effAdjust, const Float_t adjustment) {
+
+  _adjustTrackEff = effAdjust;
+  _effAdjust      = adjustment;
+  PrintInfo(17);
+
+}  // 'AdjustTrackEfficiency(Bool_t, Float_t)'
+
+
+
 void StMcJetTreeMaker::Init() {
 
   _fOutput = new TFile(_sOutput.Data(), "recreate");
@@ -268,6 +278,13 @@ void StMcJetTreeMaker::Make(const UInt_t evtFlag, const UInt_t trgFlag) {
       const Bool_t isGoodTrk    = IsGoodTrack(hTrk, pTtrk);
       const Bool_t isFinalState = IsFinalState(idEnd);
       if (!isGoodTrk || !isFinalState) continue;
+
+      // adjust tracking efficiency (if need be)
+      if (_adjustTrackEff && isCharged) {
+        const Float_t rando = _random -> Uniform(0., 1.);
+        const Bool_t  pass  = (rando > _effAdjust);
+        if (!pass) continue;
+      }
 
 
       if (isCharged) {

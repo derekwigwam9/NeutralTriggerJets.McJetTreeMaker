@@ -19,6 +19,7 @@
 #include "TChain.h"
 #include "TString.h"
 #include "TVector3.h"
+#include "TRandom3.h"
 #include "TDirectory.h"
 #include "TLorentzVector.h"
 
@@ -48,6 +49,7 @@ class StMcJetTreeMaker {
     Int_t    _fCurrent;
     UInt_t   _jetType;
     Bool_t   _isInBatchMode;
+    Bool_t   _adjustTrackEff;
     TH1D    *_hEvtQA[NHistQA][NTrgTypes];
     TH1D    *_hTrkQA[NHistQA][NTrgTypes];
     TH1D    *_hTwrQA[NHistQA][NTrgTypes];
@@ -55,8 +57,10 @@ class StMcJetTreeMaker {
     TTree   *_tMc;
     TTree   *_tJet;
     TFile   *_fOutput;
+    Float_t  _effAdjust;
     TString  _sInput;
     TString  _sOutput;
+    TRandom *_random;
 
     // event parameters
     Double_t _rVtxMax;
@@ -193,6 +197,7 @@ class StMcJetTreeMaker {
     void SetTriggerParameters(const Double_t etaTrgMax, const Double_t eTtrgMin, const Double_t eTtrgMax);
     void SetTrackParameters(const Double_t etaTrkMax, const Double_t pTtrkMin, const Double_t pTtrkMax);
     void SetJetParameters(const UInt_t type, const UInt_t nRepeat, const UInt_t nRemove, const Double_t rJet, const Double_t aGhost, const Double_t pTjetMin, const Double_t etaGhostMax, const Double_t etaJetMax, const Double_t etaBkgdMax);
+    void AdjustTrackEfficiency(const Bool_t effAdjust, const Float_t adjustment);
     void Init();
     void Make(const UInt_t evtFlag=0, const UInt_t trgFlag=0);
     void Finish();
@@ -208,8 +213,10 @@ class StMcJetTreeMaker {
 
 StMcJetTreeMaker::StMcJetTreeMaker(const Bool_t batch, TTree *tree) : _tMc(0) {
 
-  _tMc           = tree;
-  _isInBatchMode = batch;
+  _tMc            = tree;
+  _isInBatchMode  = batch;
+  _adjustTrackEff = false;
+  _effAdjust      = 0.;
 
   // clear output vectors
   _JetIndex.clear();
