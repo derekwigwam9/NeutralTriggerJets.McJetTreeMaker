@@ -25,8 +25,8 @@ class StMcJetTreeMaker;
 
 
 // i/o parameters
-static const TString  sInDefault("../../MuDstMatching/output/merged/pt25ff.matchWithMc.root");
-static const TString  sOutDefault("pp200r9pt25ff.particle.r05rm1chrg.root");
+static const TString  sInDefault("../../MuDstMatching/output/merged/pt25rff.matchWithMc.root");
+static const TString  sOutDefault("pp200r9pt25ff.particleEffTestP5.r02rm1chrg.root");
 static const Double_t pTdefault(25.);
 // jet parameters
 static const UInt_t   type(0);
@@ -34,12 +34,17 @@ static const UInt_t   event(0);
 static const UInt_t   trigger(0);
 static const UInt_t   nRepeat(1);
 static const UInt_t   nRemove(1);
-static const Double_t rJet(0.5);
+static const Double_t rJet(0.2);
 static const Double_t aGhost(0.01);
 static const Double_t pTjetMin(0.2);
 static const Double_t etaGhostMax(1.0 + rJet);
 static const Double_t etaJetMax(1.0 - rJet);
 static const Double_t etaBkgdMax(1.0);
+
+// systematic parameters
+static const Bool_t  adjustEff(true);
+static const Float_t effAdjust(0.05);
+
 
 
 void MakeMcJetTree(const Double_t pTparton=pTdefault, const TString sInput=sInDefault, const TString sOutput=sOutDefault, const Bool_t isInBatchMode=false) {
@@ -67,6 +72,7 @@ void MakeMcJetTree(const Double_t pTparton=pTdefault, const TString sInput=sInDe
   mcJetMaker -> SetTriggerParameters(etaTrgMax, eTtrgMin, eTtrgMax);
   mcJetMaker -> SetTrackParameters(etaTrkMax, pTtrkMin, pTtrkMax);
   mcJetMaker -> SetJetParameters(type, nRepeat, nRemove, rJet, aGhost, pTjetMin, etaGhostMax, etaJetMax, etaBkgdMax);
+  if (adjustEff) mcJetMaker -> AdjustTrackEfficiency(adjustEff, effAdjust);
   // find jets
   mcJetMaker -> Init();
   mcJetMaker -> Make(event, trigger);
